@@ -1,0 +1,12 @@
+# Global owners for all files
+* @PraveenGongada
+
+# Action definition
+action.yml @PraveenGongada
+setup.sh @PraveenGongada
+
+# Release workflow
+.github/workflows/release.yaml @PraveenGongada
+
+# Documentation
+README.md @PraveenGongada
