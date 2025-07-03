@@ -1,0 +1,52 @@
+name: Test Setup Catalyst Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Test setup on Linux
+        uses: ./
+        with:
+          version: 'latest'
+      
+      - name: Verify installation
+        run: |
+          catalyst -version
+          which catalyst
+
+  test-macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Test setup on macOS
+        uses: ./
+        with:
+          version: 'latest'
+      
+      - name: Verify installation
+        run: |
+          catalyst -version
+          which catalyst
+
+  test-specific-version:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test specific version
+        uses: ./
+        with:
+          version: "v1.0.0"
+
+      - name: Verify installation
+        run: |
+          catalyst -version

@@ -1,0 +1,48 @@
+name: 'Setup Catalyst'
+description: 'Set up Catalyst CLI for GitHub Actions workflows'
+author: 'Praveen Kumar'
+
+branding:
+  icon: 'zap'
+  color: 'blue'
+
+inputs:
+  version:
+    description: 'Version of Catalyst to install (default: latest)'
+    required: false
+    default: 'latest'
+    
+  github-token:
+    description: 'GitHub token for downloading releases'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  catalyst-version:
+    description: 'The version of Catalyst that was installed'
+    value: ${{ steps.setup.outputs.version }}
+  
+  catalyst-path:
+    description: 'Path to the Catalyst binary'
+    value: ${{ steps.setup.outputs.path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache Catalyst binary
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/catalyst
+        key: catalyst-${{ inputs.version }}-${{ runner.os }}-${{ runner.arch }}
+        restore-keys: |
+          catalyst-${{ inputs.version }}-${{ runner.os }}-
+    
+    - name: Setup Catalyst
+      id: setup
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        source "${{ github.action_path }}/setup.sh"
+        setup_catalyst
