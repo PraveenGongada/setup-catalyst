@@ -124,6 +124,7 @@ download_catalyst() {
     chmod +x "$binary_dir/catalyst"
     
     # Add to PATH
+    export PATH="$binary_dir:$PATH"
     echo "$binary_dir" >> $GITHUB_PATH
     
     # Clean up
@@ -140,11 +141,19 @@ download_catalyst() {
 verify_installation() {
     log_info "Verifying Catalyst installation..."
     
-    if command -v catalyst >/dev/null 2>&1; then
-        local installed_version=$(catalyst -version | head -n1)
+    local binary_dir="$HOME/.local/bin"
+    
+    if [[ -f "$binary_dir/catalyst" ]]; then
+        local installed_version=$("$binary_dir/catalyst" -version 2>&1 | head -n1)
         log_success "Catalyst verification successful: $installed_version"
+        
+        if command -v catalyst >/dev/null 2>&1; then
+            log_info "Catalyst is also available in PATH"
+        else
+            log_warning "Catalyst binary exists but not yet in PATH (this is normal in GitHub Actions)"
+        fi
     else
-        log_error "Catalyst verification failed - binary not found in PATH"
+        log_error "Catalyst binary not found at expected location: $binary_dir/catalyst"
         exit 1
     fi
 }
