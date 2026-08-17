@@ -19,7 +19,7 @@ jobs:
       
       - name: Verify installation
         run: |
-          catalyst -version
+          catalyst version
           which catalyst
 
   test-macos:
@@ -34,7 +34,7 @@ jobs:
       
       - name: Verify installation
         run: |
-          catalyst -version
+          catalyst version
           which catalyst
 
   test-specific-version:
@@ -45,8 +45,8 @@ jobs:
       - name: Test specific version
         uses: ./
         with:
-          version: "v1.0.0"
+          version: "v1.2.0"
 
       - name: Verify installation
         run: |
-          catalyst -version
+          catalyst version

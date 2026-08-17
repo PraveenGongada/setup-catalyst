@@ -26,6 +26,10 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+log_elapsed() {
+    echo -e "${BLUE}[TIMING]${NC} $1: $(( $(date +%s) - $2 ))s"
+}
+
 # Detect OS and architecture
 detect_platform() {
     local os=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -66,7 +70,8 @@ get_latest_version() {
     
     local api_url="https://api.github.com/repos/PraveenGongada/catalyst/releases/latest"
     local auth_header=""
-    
+    local start=$(date +%s)
+
     if [[ -n "$INPUT_GITHUB_TOKEN" ]]; then
         auth_header="Authorization: token $INPUT_GITHUB_TOKEN"
     fi
@@ -82,11 +87,13 @@ get_latest_version() {
         exit 1
     fi
     
+    log_elapsed "GitHub API lookup" "$start"
+
     if [[ -z "$LATEST_VERSION" ]]; then
         log_error "Failed to fetch latest version"
         exit 1
     fi
-    
+
     log_info "Latest version: $LATEST_VERSION"
 }
 
@@ -103,17 +110,21 @@ download_catalyst() {
     mkdir -p "$binary_dir"
     
     # Download the release
+    local start=$(date +%s)
     if ! curl -fsSL "$download_url" -o "$temp_dir/catalyst.tar.gz"; then
         log_error "Failed to download Catalyst from $download_url"
         exit 1
     fi
-    
+    log_elapsed "Tarball download" "$start"
+
     # Extract the binary
+    start=$(date +%s)
     if ! tar -xzf "$temp_dir/catalyst.tar.gz" -C "$temp_dir"; then
         log_error "Failed to extract Catalyst archive"
         exit 1
     fi
-    
+    log_elapsed "Archive extract" "$start"
+
     # Move binary to destination
     if ! mv "$temp_dir/catalyst" "$binary_dir/catalyst"; then
         log_error "Failed to install Catalyst binary"
@@ -144,7 +155,9 @@ verify_installation() {
     local binary_dir="$HOME/.local/bin"
     
     if [[ -f "$binary_dir/catalyst" ]]; then
-        local installed_version=$("$binary_dir/catalyst" -version 2>&1 | head -n1)
+        local start=$(date +%s)
+        local installed_version=$("$binary_dir/catalyst" version | head -n1)
+        log_elapsed "Binary exec check" "$start"
         log_success "Catalyst verification successful: $installed_version"
         
         if command -v catalyst >/dev/null 2>&1; then
@@ -160,8 +173,10 @@ verify_installation() {
 
 # Main setup function
 setup_catalyst() {
+    local total_start=$(date +%s)
+
     log_info "Starting Catalyst setup..."
-    
+
     # Detect platform
     detect_platform
     
@@ -178,7 +193,8 @@ setup_catalyst() {
     download_catalyst "$version_to_install"
     
     verify_installation
-    
+
+    log_elapsed "Total setup" "$total_start"
     log_success "Catalyst setup completed successfully!"
 }
 
